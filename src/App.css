@@ -48,3 +48,13 @@ header h1 {
   text-align: center;
   line-height: 64px;
 }
+
+#languages {
+  display: flex;
+  text-align: left;
+  justify-content: space-around;
+}
+
+#languages > div {
+  flex: 0 0 25%;
+}

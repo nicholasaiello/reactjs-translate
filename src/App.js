@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import * as Env from './constants/Env';
 
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 import Typeahead from './Typeahead';
 
 import './App.css';
@@ -87,7 +89,7 @@ class App extends Component {
 
     const languageOptions = (value) => (
         Object.keys(this.props.codes).map((k, i) => (
-          (<option key={i} value={k} selected={value === k}>{this.props.codes[k]}</option>)
+          (<MenuItem key={i} value={k} primaryText={this.props.codes[k]} />)
         ))
     )
 
@@ -104,15 +106,21 @@ class App extends Component {
         <section>
           <Typeahead onSubmit={(e, text) => this.handleInputSubmit(e, text)} />
         </section>
-        <section>
-          <select name="source" onChange={this.handleSourceSelectChange}>
-            <option>From:</option>
+        <section id={"languages"}>
+          <SelectField 
+            name="source"
+            value={this.state.source}
+            floatingLabelText={"From:"}
+            onChange={this.handleSourceSelectChange}>
             {languageOptions(this.state.source)}
-          </select> 
-          <select name="target" onChange={this.handleTargetSelectChange}>
-            <option>To: </option>
+          </SelectField> 
+          <SelectField
+            name="target"
+            value={this.state.target}
+            floatingLabelText={"To:"}
+            onChange={this.handleTargetSelectChange}>
             {languageOptions(this.state.target)}
-          </select>
+          </SelectField>
         </section>
       </div>
     )
@@ -125,6 +133,8 @@ App.defaultProps = {
     en: 'English',
     es: 'Spanish',
     it: 'Italian',
+    fr: 'French',
+    de: 'German',
     mal: 'Malayalam'
   },
   defaultSource: 'en',
