@@ -20,7 +20,8 @@ class Typeahead extends Component {
   }
 
   componentWillMount = () => {
-    this.history = JSON.parse(window.localStorage.getItem(KEY_HISTORY) || '[]');
+    this.history = JSON.parse(
+      window.localStorage.getItem(KEY_HISTORY) || '[]').filter((x) => x !== null);
   }
 
   componentWillUnmount = () => {
@@ -28,14 +29,17 @@ class Typeahead extends Component {
   }
 
   addToHistory = (text) => {
-    if (this.history.indexOf(text) !== -1) {
+    if (!text) {
+      return false;
+    } else if (this.history.indexOf(text) !== -1) {
       delete this.history[this.history.indexOf(text)];
     } else if (this.history.length >= MAX_HISTORY_ITEMS) {
       this.history.pop();
     }
 
     this.history.unshift(text);
-    window.localStorage.setItem(KEY_HISTORY, JSON.stringify(this.history));
+    window.localStorage.setItem(
+      KEY_HISTORY, JSON.stringify(this.history.filter((x) => x !== null)));
 
     return true;
   }
@@ -64,6 +68,7 @@ class Typeahead extends Component {
   }
 
   handleHistoryClick = (e, query) => {
+    e.preventDefault();
     this.doFormSubmit(e, query);
   }
 
@@ -73,13 +78,14 @@ class Typeahead extends Component {
     const form = document.forms[0],
       query = form.query.value || '';
 
+    form.query.value = '';
     this.doFormSubmit(e, query);
   }
 
   doFormSubmit = (e, query) => {
     this.handleInputBlur();
 
-    if (/^[\w\s\-\'\?\.\,]{2,256}$/.test(query)) {
+    if (query && /^[\w\s\-\'\?\.\,]{2,256}$/.test(query)) {
       this.setState({ disabled: true, errorText: null });
 
       if (this.submitTimeoutId) {
@@ -87,8 +93,9 @@ class Typeahead extends Component {
       }
 
       this.submitTimeoutId = setTimeout(() => {
-        this.props.onSubmit(e, query);
         this.addToHistory(query);
+
+        this.props.onSubmit(e, query);
         this.setState({ disabled: false });
       }, 500);
     } else {
@@ -98,8 +105,8 @@ class Typeahead extends Component {
 
   render() {
 
-    const el = this.state.anchorEl;
     let suggestionStyles = {};
+    const el = this.state.anchorEl;
 
     if (el) {
       suggestionStyles = {
@@ -109,14 +116,16 @@ class Typeahead extends Component {
     }
 
     const historyItems = this.history.map((x, i) => (
-      <li key={i} onClick={(e) => this.handleHistoryClick(e, x)}>{x}</li>
+      <li key={'history-' + i}>
+        <button onClick={(e) => this.handleHistoryClick(e, x)}>{x}</button>
+      </li>
     ));
 
     return (
       <form onSubmit={this.handleFormSubmit} style={this.props.formStyles}>
         <TextField
           name={"query"}
-          style={{margin: '4px 16px', flex: '0 0 50%'}}
+          style={this.props.textFieldStyles}
           disabled={this.state.disabled}
           autoComplete={"off"}
           hintText={"ex. How are you?"}
@@ -148,6 +157,10 @@ Typeahead.defaultProps = {
     justifyContent: 'center',
     alignItems: 'baseline',
     margin: '16px 0'
+  },
+  textFieldStyles: {
+    margin: '4px 16px',
+    flex: '0 0 50%'
   },
   onSubmit: (e, text) => {}
 };

@@ -62,38 +62,46 @@ header h1 {
 .history-suggestions {
   display: block;
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   background: #fff;
   box-shadow: rgba(0,0,0,0.25) 0 2px 5px 0px;
   transform: scaleY(0);
   transform-origin: 0% 0%;
   transition: transform 100ms linear;
-  pointer-events: none;
+  backface-visibility: hidden;
+  perspective-origin: 1000;
 }
 
 .history-suggestions.open {
   transform: scaleY(1);
-  pointer-events: auto;
 }
 
 .history-suggestions, .history-suggestions li {
+  display: block;
   margin: 0;
   padding: 0;
   list-style-type: none; 
 }
 
 .history-suggestions li {
-  padding: 8px 8px;
   border-bottom: 1px solid #ddd;
+  cursor: default;
+}
+
+.history-suggestions li button {
+  width: 100%;
+  padding: 8px 8px;
+  font-size: 14px;
   font-family: 'Roboto', sans-serif;
   text-align: left;
-  cursor: default;
+  border: none;
+  background: transparent;
 }
 
 .history-suggestions li:last-child {
   border-bottom: 0;
 }
 
-.history-suggestions li:hover {
+.history-suggestions li:hover button {
   background: #ededed;
 }

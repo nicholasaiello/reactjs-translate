@@ -42,23 +42,24 @@ class App extends Component {
       }
     }
 
-    this.webSocket.onopen = (event) => {
-
-    }
-
     this.webSocket.onclose = (event) => {
       this.webSocket = null;
     }
   }
 
+  // push data to queue
   handleInputSubmit = (e, text) => {
     this.setState({ fetching: true });
-    this.webSocket.send(
-      JSON.stringify({
-        to: this.state.target,
-        frm: this.state.source,
-        text: text})
-    );
+    if (this.webSocket !== null) {
+      this.webSocket.send(
+        JSON.stringify({
+          to: this.state.target,
+          frm: this.state.source,
+          text: text})
+      );
+    } else {
+      this.initWebSocket();
+    }
   }
 
   handleSourceSelectChange = (e) => {
@@ -96,7 +97,7 @@ class App extends Component {
     return (
       <div className="App">
         <header>
-          <h1 className="App-title">ReactJS Translate</h1>
+          <h1 className="app-title">ReactJS Translate</h1>
         </header>
         <section id={"translation"} className={this.state.fetching ? 'loading' : ''}>
           <h5 className={"source"}>{this.state.source}</h5>
