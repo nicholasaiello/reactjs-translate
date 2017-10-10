@@ -62,11 +62,8 @@ class App extends Component {
     }
   }
 
-  handleSourceSelectChange = (e) => {
-    const element = e.target || e.currentTarget,
-      value = element.value;
-
-    if (value in this.props.codes && value !== this.state.target) {
+  handleSourceSelectChange = (e, key, value) => {
+    if (value && value !== this.state.target) {
       this.setState({source: value});
       return true;
     }
@@ -74,11 +71,8 @@ class App extends Component {
     return false;
   }
 
-  handleTargetSelectChange = (e) => {
-    const element = e.target || e.currentTarget,
-     value = element.value;
-
-    if (value in this.props.codes && value !== this.state.source) {
+  handleTargetSelectChange = (e, key, value) => {
+    if (value && value !== this.state.source) {
       this.setState({target: value});
       return true;
     }
