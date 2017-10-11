@@ -3,15 +3,17 @@ import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import HistoryQueue from './HistoryQueue';
 
-const KEY_HISTORY = '__history';
+
+const KEY_HISTORY = '__history1';
 const MAX_HISTORY_ITEMS = 5;
 
 class Typeahead extends Component {
 
   constructor(props) {
     super(props);
-    this.history = [];
+    this.history = new HistoryQueue(KEY_HISTORY, MAX_HISTORY_ITEMS);
     this.state = { 
       disabled: false,
       errorText: null,
@@ -20,8 +22,7 @@ class Typeahead extends Component {
   }
 
   componentWillMount = () => {
-    this.history = JSON.parse(
-      window.localStorage.getItem(KEY_HISTORY) || '[]').filter((x) => x !== null);
+    this.history.restore();
   }
 
   componentWillUnmount = () => {
@@ -31,17 +32,9 @@ class Typeahead extends Component {
   addToHistory = (text) => {
     if (!text) {
       return false;
-    } else if (this.history.indexOf(text) !== -1) {
-      delete this.history[this.history.indexOf(text)];
-    } else if (this.history.length >= MAX_HISTORY_ITEMS) {
-      this.history.pop();
     }
 
-    this.history.unshift(text);
-    window.localStorage.setItem(
-      KEY_HISTORY, JSON.stringify(this.history.filter((x) => x !== null)));
-
-    return true;
+    return this.history.add(text, this.state.source, this.state.target);
   }
 
   handleWindowResize = (e) => {
@@ -115,9 +108,9 @@ class Typeahead extends Component {
         width: (el.clientWidth + 'px')};
     }
 
-    const historyItems = this.history.map((x, i) => (
+    const historyItems = this.history.getAll().map((x, i) => (
       <li key={'history-' + i}>
-        <button onClick={(e) => this.handleHistoryClick(e, x)}>{x}</button>
+        <button onClick={(e) => this.handleHistoryClick(e, x.q)}>{x.q}</button>
       </li>
     ));
 
