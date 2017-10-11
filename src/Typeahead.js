@@ -61,8 +61,9 @@ class Typeahead extends Component {
   }
 
   handleHistoryClick = (e, query) => {
-    e.preventDefault();
-    this.doFormSubmit(e, query);
+    const form = document.forms[0];
+    form.query.value = query;
+    this.handleFormSubmit(e);
   }
 
   handleFormSubmit = (e) => {
@@ -71,7 +72,6 @@ class Typeahead extends Component {
     const form = document.forms[0],
       query = form.query.value || '';
 
-    form.query.value = '';
     this.doFormSubmit(e, query);
   }
 
@@ -103,8 +103,8 @@ class Typeahead extends Component {
 
     if (el) {
       suggestionStyles = {
-        top: ((el.offsetTop + el.clientHeight - 18) + 'px'),
-        left: ((el.offsetParent.offsetLeft ) + 'px'),
+        top: ((el.offsetTop + el.clientHeight + 1) + 'px'),
+        left: ((el.offsetLeft ) + 'px'),
         width: (el.clientWidth + 'px')};
     }
 
@@ -115,19 +115,17 @@ class Typeahead extends Component {
     ));
 
     return (
-      <form onSubmit={this.handleFormSubmit} style={this.props.formStyles}>
-        <TextField
+      <form id={"typeahead"} onSubmit={this.handleFormSubmit} style={this.props.formStyles}>
+        <input
           name={"query"}
-          style={this.props.textFieldStyles}
-          disabled={this.state.disabled}
+          type={"text"}
           autoComplete={"off"}
-          hintText={"ex. How are you?"}
-          errorText={this.state.errorText}
-          floatingLabelText={"Enter word or phrase"}
-          floatingLabelFixed={true}
+          disabled={this.state.disabled}
+          maxLength={"256"}
+          placeholder={"Enter word or phrase (256 chars max.)"}
           onFocus={(e) => this.handleInputFocus(e)}
           onBlur={(e) => this.handleInputBlur(e)}
-          onChange={(e) => this.handleInputChange(e)} />
+          onInput={(e) => this.handleInputChange(e)} />
         <RaisedButton
           type={"submit"}
           label={"Translate"}
@@ -150,10 +148,6 @@ Typeahead.defaultProps = {
     justifyContent: 'center',
     alignItems: 'baseline',
     margin: '16px 0'
-  },
-  textFieldStyles: {
-    margin: '4px 16px',
-    flex: '0 0 50%'
   },
   onSubmit: (e, text) => {}
 };
