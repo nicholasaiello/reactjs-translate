@@ -60,6 +60,14 @@ header h1 {
   flex: 0 0 25%;
 }
 
+#typeahead {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin: '16px 0';
+}
+
 #typeahead input[name="query"] {
   margin: 0px 8px;
   flex: 0 0 50%;
@@ -85,6 +93,8 @@ header h1 {
 #typeahead .history-suggestions {
   display: block;
   position: absolute;
+  max-height: 150px;
+  overflow-y: scroll;
   z-index: 10;
   background: #fff;
   box-shadow: rgba(0,0,0,0.25) 0 2px 5px 0px;

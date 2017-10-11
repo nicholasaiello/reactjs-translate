@@ -7,7 +7,7 @@ import HistoryQueue from './HistoryQueue';
 
 
 const KEY_HISTORY = '__history1';
-const MAX_HISTORY_ITEMS = 5;
+const MAX_HISTORY_ITEMS = 10;
 
 class Typeahead extends Component {
 
@@ -16,9 +16,10 @@ class Typeahead extends Component {
     this.history = new HistoryQueue(KEY_HISTORY, MAX_HISTORY_ITEMS);
     this.state = { 
       disabled: false,
+      query: '',
       errorText: null,
       anchorEl: null,
-      popoverOpen: false };
+      open: false };
   }
 
   componentWillMount = () => {
@@ -37,32 +38,29 @@ class Typeahead extends Component {
     return this.history.add(text, this.state.source, this.state.target);
   }
 
-  handleWindowResize = (e) => {
-    // HACK
-    this.setState({ popoverOpen: true });
-  }
-
   handleInputFocus = (e) => {
-    window.addEventListener('resize', this.handleWindowResize);
-    this.setState({ popoverOpen: true, anchorEl: (e.target || e.currentTarget) });
+    this.setState({ open: true, anchorEl: (e.target || e.currentTarget) });
     return true;
   }
 
   handleInputBlur = (e) => {
-    window.removeEventListener('resize', this.handleWindowResize);
-    this.setState({ popoverOpen: false });
+    this.setState({ open: false });
     return true;
   }
 
   handleInputChange = (e) => {
-    if (!this.state.popoverOpen) {
+    if (!this.state.open) {
       this.handleInputFocus(e);
     }
+
+    const form = document.forms[0];
+    this.setState({ query: form.query.value });
   }
 
   handleHistoryClick = (e, query) => {
     const form = document.forms[0];
     form.query.value = query;
+    this.setState({ query: query });
     this.handleFormSubmit(e);
   }
 
@@ -98,24 +96,27 @@ class Typeahead extends Component {
 
   render() {
 
-    let suggestionStyles = {};
+    let suggestionStyles = {}, query = '';
     const el = this.state.anchorEl;
 
     if (el) {
+      query = el.value || '';
       suggestionStyles = {
         top: ((el.offsetTop + el.clientHeight + 1) + 'px'),
         left: ((el.offsetLeft ) + 'px'),
         width: (el.clientWidth + 'px')};
     }
 
-    const historyItems = this.history.getAll().map((x, i) => (
-      <li key={'history-' + i}>
-        <button onClick={(e) => this.handleHistoryClick(e, x.q)}>{x.q}</button>
-      </li>
-    ));
+    const historyItems = this.history.getAll()
+      .filter((x) => query === '' || x.q.indexOf(query) !== -1)
+      .map((x,i) => (
+        <li key={'history-' + i}>
+          <button onClick={(e) => this.handleHistoryClick(e, x.q)}>{x.q}</button>
+        </li>
+      ));
 
     return (
-      <form id={"typeahead"} onSubmit={this.handleFormSubmit} style={this.props.formStyles}>
+      <form id={"typeahead"} onSubmit={this.handleFormSubmit}>
         <input
           name={"query"}
           type={"text"}
@@ -131,7 +132,7 @@ class Typeahead extends Component {
           label={"Translate"}
           secondary={true}
           style={{flex: '0 0 30%'}} />
-        <ul className={"history-suggestions" + (this.state.popoverOpen ? ' open' : '')}
+        <ul className={"history-suggestions" + (this.state.open ? ' open' : '')}
           style={suggestionStyles}>
           {historyItems}
         </ul>
@@ -142,13 +143,6 @@ class Typeahead extends Component {
 }
 
 Typeahead.defaultProps = {
-  formStyles: {
-    position: 'relative',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'baseline',
-    margin: '16px 0'
-  },
   onSubmit: (e, text) => {}
 };
 
